@@ -202,10 +202,14 @@ EOF
     xdg-mime default aide-url-handler.desktop x-scheme-handler/aide
 }
 
-# Set permissions for chrome-sandbox
+# Set permissions for chrome-sandbox and the sidecar binary
 set_permissions() {
     sudo chown root "${PKGDIR}/chrome-sandbox"
     sudo chmod 4755 "${PKGDIR}/chrome-sandbox"
+    sudo chmod 755 "${PKGDIR}/resources/app/extensions/codestory/sidecar_bin/target/release/webserver"
+    sudo chmod 755 "${PKGDIR}/resources/app/extensions/codestory/sidecar_bin/sidecar/qdrant/qdrant_mac"
+    sudo chmod 755 "${PKGDIR}/resources/app/extensions/codestory/sidecar_bin/sidecar/onnxruntime/libonnxruntime.dylib"
+    sudo chmod 755 "${PKGDIR}/resources/app/extensions/codestory/sidecar_bin/sidecar/onnxruntime/libonnxruntime.so"
 }
 
 # Set up shell completions
