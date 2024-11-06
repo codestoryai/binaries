@@ -1,65 +1,62 @@
 #!/bin/bash
 
-# Aide Uninstallation Script for All Linux Distros
-# Ensure the script is run with sudo privileges
+set -e
 
-# Variables
-_pkgname="aide"
-install_dir="/opt/aide"
-desktop_files=(
-    "/usr/share/applications/aide.desktop"
-    "/usr/share/applications/aide-url-handler.desktop"
-)
-symlink="/usr/local/bin/aide"
+# Define variables
+PKGNAME="aide"
+PKGDIR="/opt/${PKGNAME}"
 
-# Function to remove installation directory
-remove_installation_directory() {
-    if [[ -d "$install_dir" ]]; then
-        echo "Removing Aide installation directory at $install_dir..."
-        sudo rm -rf "$install_dir"
-    else
-        echo "Installation directory not found at $install_dir."
-    fi
+# Remove Aide files and directories
+remove_aide_files() {
+    echo "Removing Aide files..."
+    sudo rm -rf "${PKGDIR}"
 }
 
-# Function to remove desktop entries
-remove_desktop_files() {
+# Remove the launch script
+remove_launch_script() {
+    echo "Removing the launch script..."
+    sudo rm -f /usr/bin/aide
+}
+
+# Remove the application icon
+remove_icon() {
+    echo "Removing the application icon..."
+    sudo rm -f /usr/share/pixmaps/aide.png
+}
+
+# Remove the desktop entries
+remove_desktop_entries() {
     echo "Removing desktop entries..."
-    for file in "${desktop_files[@]}"; do
-        if [[ -f "$file" ]]; then
-            sudo rm -f "$file"
-            echo "Removed $file"
-        else
-            echo "Desktop file $file not found."
-        fi
-    done
+    sudo rm -f /usr/share/applications/aide.desktop
+    sudo rm -f /usr/share/applications/aide-wayland.desktop
+    sudo rm -f /usr/share/applications/aide-url-handler.desktop
 }
 
-# Function to remove symbolic links
-remove_symlinks() {
-    if [[ -L "$symlink" ]]; then
-        echo "Removing symbolic link at $symlink..."
-        sudo rm -f "$symlink"
-    else
-        echo "Symbolic link $symlink not found."
-    fi
+# Remove the chrome-sandbox permissions
+remove_permissions() {
+    echo "Removing chrome-sandbox permissions..."
+    sudo rm -f "${PKGDIR}/chrome-sandbox"
 }
 
-# Main script execution
+# Remove shell completions
+remove_completions() {
+    echo "Removing shell completions..."
+    sudo rm -f /usr/share/zsh/site-functions/_aide
+    sudo rm -f /usr/share/bash-completion/completions/aide
+}
+
+# Main uninstallation sequence
 main() {
-    echo "Starting Aide uninstallation..."
+    remove_aide_files
+    remove_launch_script
+    remove_icon
+    remove_desktop_entries
+    remove_permissions
+    remove_completions
 
-    # Remove installation directory
-    remove_installation_directory
-
-    # Remove desktop files
-    remove_desktop_files
-
-    # Remove symbolic link
-    remove_symlinks
-
-    echo "Aide uninstallation completed!"
+    echo "Aide uninstallation complete."
+    echo "The dependencies were not removed."
 }
 
-# Run the script
+# Run the main function
 main
