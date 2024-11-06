@@ -198,6 +198,8 @@ Categories=Utility;TextEditor;Development;IDE;
 MimeType=x-scheme-handler/aide;
 Keywords=vscode;aide;
 EOF
+
+    xdg-mime default aide-url-handler.desktop x-scheme-handler/aide
 }
 
 # Set permissions for chrome-sandbox
