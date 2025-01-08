@@ -7,32 +7,37 @@ PKGNAME="aide"
 PKGDIR="/opt/${PKGNAME}"
 ARCH=$(uname -m)
 
-# Function to fetch the latest release version from GitHub
+# Function to fetch the latest release information from Aide Updates API
 fetch_latest_version() {
-    echo "Fetching the latest Aide release version..."
-    latest_release_info=$(curl -s https://api.github.com/repos/codestoryai/binaries/releases/latest)
-    PKGVER=$(echo "$latest_release_info" | grep -Po '"tag_name": "\K[0-9.]+')
-    if [[ -z "$PKGVER" ]]; then
-        echo "Error: Unable to fetch the latest version."
-        exit 1
-    fi
-    echo "Latest version: $PKGVER"
-}
+    echo "Fetching the latest Aide release information..."
+    release_info=$(curl -s https://aide-updates.codestory.ai/api/all/stable)
 
-# Function to set the correct tarball URL based on architecture
-set_tarball_url() {
+    # Extract URLs based on architecture
     case "$ARCH" in
         x86_64)
-            BIN_URL="https://github.com/codestoryai/binaries/releases/download/${PKGVER}/Aide-linux-x64-${PKGVER}.tar.gz"
+            BIN_URL=$(echo "$release_info" | grep '"linux_x64"' | cut -d'"' -f4)
             ;;
         aarch64)
-            BIN_URL="https://github.com/codestoryai/binaries/releases/download/${PKGVER}/Aide-linux-arm64-${PKGVER}.tar.gz"
+            BIN_URL=$(echo "$release_info" | grep '"linux_arm64"' | cut -d'"' -f4)
             ;;
         *)
             echo "Unsupported architecture: $ARCH"
             exit 1
             ;;
     esac
+
+    if [[ -z "$BIN_URL" ]]; then
+        echo "Error: Unable to fetch the download URL for your architecture."
+        exit 1
+    fi
+
+    # Extract version from the URL
+    PKGVER=$(echo "$BIN_URL" | sed -n 's|.*/\([0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\)/.*|\1|p')
+    if [[ -z "$PKGVER" ]]; then
+        echo "Error: Unable to extract version information."
+        exit 1
+    fi
+    echo "Latest version: $PKGVER"
 }
 
 # Check for and install required dependencies
@@ -219,7 +224,6 @@ setup_completions() {
 # Main installation sequence
 main() {
     fetch_latest_version
-    set_tarball_url
     # check_dependencies
     install_aide
     create_launch_script
