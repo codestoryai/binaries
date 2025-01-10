@@ -9,21 +9,30 @@ ARCH=$(uname -m)
 
 # Function to fetch the latest release information from Aide Updates API
 fetch_latest_version() {
+    extract_download_url_from_release_info_for() {
+        target=${1}
+        printf '%s' "$(
+            printf '%s' "${release_info}" |
+                grep "${target}" |
+                sed "s/^.*\"${target}\":\"\([[:alnum:]:/.-]\+\)\".*$/\1/"
+        )"
+    }
+
     echo "Fetching the latest Aide release information..."
     release_info=$(curl -s https://aide-updates.codestory.ai/api/all/stable)
 
     # Extract URLs based on architecture
     case "$ARCH" in
-        x86_64)
-            BIN_URL=$(echo "$release_info" | grep '"linux_x64"' | cut -d'"' -f4)
-            ;;
-        aarch64)
-            BIN_URL=$(echo "$release_info" | grep '"linux_arm64"' | cut -d'"' -f4)
-            ;;
-        *)
-            echo "Unsupported architecture: $ARCH"
-            exit 1
-            ;;
+    x86_64)
+        BIN_URL="$(extract_download_url_from_release_info_for 'linux_x64')"
+        ;;
+    aarch64)
+        BIN_URL="$(extract_download_url_from_release_info_for 'linux_arm64')"
+        ;;
+    *)
+        printf 'Unsupported architecture: %s\n' "${ARCH}"
+        exit 1
+        ;;
     esac
 
     if [[ -z "$BIN_URL" ]]; then
