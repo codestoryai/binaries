@@ -15,10 +15,10 @@ fetch_latest_version() {
     # Extract URLs based on architecture
     case "$ARCH" in
         x86_64)
-            BIN_URL=$(echo "$release_info" | grep '"linux_x64"' | cut -d'"' -f4)
+            BIN_URL=$(echo "$release_info" | sed -n 's/.*"linux_x64":"\([^"]*\)".*/\1/p')
             ;;
         aarch64)
-            BIN_URL=$(echo "$release_info" | grep '"linux_arm64"' | cut -d'"' -f4)
+            BIN_URL=$(echo "$release_info" | sed -n 's/.*"linux_arm64":"\([^"]*\)".*/\1/p')
             ;;
         *)
             echo "Unsupported architecture: $ARCH"
